@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CFTE Classify The AI Wave</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+*{box-sizing:border-box}
+body{
+margin:0;min-height:100vh;
+background:#1D1D1B;
+display:flex;justify-content:center;align-items:center;
+font-family:'Press Start 2P',monospace;
+font-size:12px;line-height:2;
+}
+.game{
+width:95%;max-width:1000px;
+background:#F7F0F0;
+border:6px solid black;
+box-shadow:12px 12px 0 black;
+padding:30px;
+}
+h1,h2,h3{color:#B71524}
+.stats{display:flex;justify-content:space-between;flex-wrap:wrap}
+.life{display:inline-block;width:20px;height:20px;background:#B71524;border:3px solid black}
+.life.off{background:#aaa}
+.card,.wave{
+background:white;
+border:5px solid black;
+box-shadow:5px 5px 0 black;
+padding:20px;
+cursor:pointer;
+}
+.card{margin:20px 0}
+.card:hover,.wave:hover{background:#ffd8dc}
+.waves{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.wave{text-align:center;min-height:130px}
+.feedback{background:black;color:#00ff55;border:5px solid #B71524;padding:20px;margin-top:20px}
+.hidden{display:none}
+button{
+background:#B71524;color:white;border:4px solid black;
+padding:15px;font-family:'Press Start 2P';cursor:pointer
+}
+@media(max-width:800px){.waves{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<div class="game">
+
+<div id="gameplay">
+
+<div class="stats">
+<div>AI SPECIALIST</div>
+<div>SCORE: <span id="score">0</span></div>
+<div><span class="life"></span><span class="life"></span><span class="life"></span></div>
+</div>
+
+<h2>CLASSIFY THE AI WAVE</h2>
+
+<div id="cards"></div>
+
+<div class="waves">
+<div class="wave" data-wave="1"><h3>WAVE 1</h3>PREDICTIVE AI</div>
+<div class="wave" data-wave="2"><h3>WAVE 2</h3>GENERATIVE AI</div>
+<div class="wave" data-wave="3"><h3>WAVE 3</h3>AGENTIC AI</div>
+</div>
+
+<div id="feedback" class="feedback hidden"></div>
+</div>
+
+
+<div id="end" class="hidden">
+<h1>MISSION COMPLETE</h1>
+<h2 id="finalScore"></h2>
+<button onclick="restart()">PLAY AGAIN</button>
+</div>
+
+</div>
+
+<script>
+
+const scenarios=[
+["CREDIT RISK SCORER","A banking model analyses historical customer data and predicts loan default risk.",1,"This is Wave 1: Predictive AI. It uses historical data to calculate future outcomes."],
+["MARKETING COPILOT","An AI assistant drafts campaign ideas and creates a report outline.",2,"This is Wave 2: Generative AI. It creates new content with human input."],
+["COMPETITOR RESEARCH AGENT","An AI system researches competitors, analyses pricing and prepares a report.",3,"This is Wave 3: Agentic AI. It plans tasks, uses tools and completes workflows."],
+["STOCK FORECASTING ALGORITHM","A machine learning model predicts future market movements.",1,"This is Wave 1: Predictive AI. It forecasts outcomes from existing data."],
+["AUTONOMOUS SERVER REPAIR AGENT","An AI detects problems, diagnoses failures and applies fixes automatically.",3,"This is Wave 3: Agentic AI. It observes, decides and acts independently."]
+];
+
+let index=0;
+let score=0;
+let lives=3;
+
+function loadCard(){
+
+if(index>=scenarios.length){
+finish();
+return;
+}
+
+let s=scenarios[index];
+
+document.getElementById("cards").innerHTML=
+`
+<div class="card" draggable="true">
+<b>${s[0]}</b><br><br>
+${s[1]}
+</div>
+`;
+
+document.querySelector(".card").ondragstart=()=>selected=s;
+
+document.querySelector(".card").onclick=()=>{
+selected=s;
+};
+
+document.querySelectorAll(".wave").forEach(w=>{
+w.onclick=()=>checkAnswer(Number(w.dataset.wave));
+w.ondragover=e=>e.preventDefault();
+w.ondrop=()=>checkAnswer(Number(w.dataset.wave));
+});
+
+}
+
+let selected=null;
+
+function checkAnswer(choice){
+
+let s=scenarios[index];
+
+if(choice===s[2]){
+score+=20;
+document.getElementById("score").innerText=score;
+show(s[3],true);
+}else{
+lives--;
+document.querySelectorAll(".life")[lives].classList.add("off");
+show(s[3],false);
+}
+
+setTimeout(()=>{
+document.getElementById("feedback").classList.add("hidden");
+index++;
+loadCard();
+},2500);
+
+}
+
+function show(text,correct){
+let f=document.getElementById("feedback");
+f.innerHTML=(correct?"CORRECT!":"INCORRECT!")+"<br><br>"+text;
+f.classList.remove("hidden");
+}
+
+function finish(){
+document.getElementById("gameplay").classList.add("hidden");
+document.getElementById("end").classList.remove("hidden");
+document.getElementById("finalScore").innerText="SCORE: "+score+"/100";
+}
+
+function restart(){
+index=0;
+score=0;
+lives=3;
+document.getElementById("score").innerText=0;
+document.querySelectorAll(".life").forEach(x=>x.classList.remove("off"));
+document.getElementById("end").classList.add("hidden");
+document.getElementById("gameplay").classList.remove("hidden");
+loadCard();
+}
+
+loadCard();
+
+</script>
+</body>
+</html>
